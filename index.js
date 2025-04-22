@@ -4,6 +4,25 @@ const addButton = document.querySelector('.add-button');
 const form = document.querySelector('form');
 const originalFieldset = document.querySelector('.beverage');
 
+function getWordForm(count) {
+    const lastDigit = count % 10;
+    const lastTwoDigits = count % 100;
+
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+        return 'напитков'; 
+    }
+
+    if (lastDigit === 1) {
+        return 'напиток';
+    }
+
+    if (lastDigit >= 2 && lastDigit <= 4) {
+        return 'напитка';
+    }
+
+    return 'напитков';
+}
+
 function createDeleteButton(fieldset) {
     const deleteButton = document.createElement('button');
     deleteButton.textContent = '❌';
@@ -21,6 +40,7 @@ function createDeleteButton(fieldset) {
     return deleteButton;
 }
 
+
 function updateHeadings() {
     const all = document.querySelectorAll('.beverage');
     all.forEach((el, i) => {
@@ -33,7 +53,7 @@ originalFieldset.appendChild(createDeleteButton(originalFieldset));
 addButton.addEventListener('click', () => {
     const newFieldset = originalFieldset.cloneNode(true);
     newFieldset.querySelectorAll('input[type=radio]').forEach((r, i) => {
-        r.checked = i === 0; // сброс radio
+        r.checked = i === 0;
     });
     newFieldset.querySelectorAll('input[type=checkbox]').forEach(c => c.checked = false);
     newFieldset.querySelector('select').selectedIndex = 0;
@@ -46,10 +66,18 @@ addButton.addEventListener('click', () => {
 });
 
 const modal = document.getElementById('modalOverlay');
+const modalText = modal.querySelector('p');
 const closeModalButton = document.getElementById('modalClose');
 
 form.addEventListener('submit', function (event) {
     event.preventDefault();
+
+    const totalBeverages = document.querySelectorAll('.beverage').length;
+
+    const wordForm = getWordForm(totalBeverages);
+
+    modalText.textContent = `Вы заказали ${totalBeverages} ${wordForm}`;
+
     modal.classList.remove('hidden');
 });
 
