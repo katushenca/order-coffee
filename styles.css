@@ -82,3 +82,17 @@
 .hidden {
     display: none;
 }
+
+.modal-table {
+    width: 100%;
+    margin-top: 1em;
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+
+.modal-table th,
+.modal-table td {
+    border: 1px solid #ccc;
+    padding: 0.5em;
+    text-align: left;
+}
