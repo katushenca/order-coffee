@@ -46,14 +46,12 @@ originalFieldset.appendChild(createDeleteButton(originalFieldset));
 addButton.addEventListener('click', () => {
     const newFieldset = originalFieldset.cloneNode(true);
 
-    // Сброс значений
     newFieldset.querySelectorAll('input[type=radio]').forEach((r, i) => {
         r.checked = i === 0;
     });
     newFieldset.querySelectorAll('input[type=checkbox]').forEach(c => c.checked = false);
     newFieldset.querySelector('select').selectedIndex = 0;
 
-    // Присваиваем уникальное имя группе radio-кнопок
     const milkRadios = newFieldset.querySelectorAll('input[type=radio]');
     const uniqueName = `milk-${Date.now()}-${Math.random()}`;
     milkRadios.forEach(radio => {
@@ -65,13 +63,45 @@ addButton.addEventListener('click', () => {
 
     form.insertBefore(newFieldset, addButton.parentNode);
     updateHeadings();
+
+    const textarea = newFieldset.querySelector('.custom-text');
+    const output = newFieldset.querySelector('.custom-text-output');
+    textarea.addEventListener('input', () => {
+        let text = textarea.value;
+
+        const keywords = ['срочно', 'быстрее', 'побыстрее', 'скорее', 'поскорее', 'очень нужно'];
+        keywords.forEach(keyword => {
+            const regex = new RegExp(`(${keyword})`, 'gi');
+            text = text.replace(regex, '<b>$1</b>');
+        });
+
+        output.innerHTML = text || '—';
+    });
 });
 
-// Модалка
+document.querySelectorAll('.beverage').forEach(bev => {
+    const textarea = bev.querySelector('.custom-text');
+    const output = bev.querySelector('.custom-text-output');
+
+    textarea.addEventListener('input', () => {
+        let text = textarea.value;
+
+        const keywords = ['срочно', 'быстрее', 'побыстрее', 'скорее', 'поскорее', 'очень нужно'];
+        keywords.forEach(keyword => {
+            const regex = new RegExp(`(${keyword})`, 'gi');
+            text = text.replace(regex, '<b>$1</b>');
+        });
+
+        output.innerHTML = text || '—';
+    });
+});
+
 const modal = document.getElementById('modalOverlay');
 const modalText = modal.querySelector('p');
 const closeModalButton = document.getElementById('modalClose');
 const tableBody = document.getElementById('modalTableBody');
+const orderTimeInput = document.getElementById('order-time');
+const confirmOrderButton = document.getElementById('confirm-order');
 
 form.addEventListener('submit', function (event) {
     event.preventDefault();
@@ -88,12 +118,14 @@ form.addEventListener('submit', function (event) {
         const extras = [...bev.querySelectorAll('input[type="checkbox"]:checked')]
             .map(c => c.nextElementSibling.textContent.trim())
             .join(', ');
+        const wishes = bev.querySelector('.custom-text').value;
 
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${drink}</td>
             <td>${milk}</td>
             <td>${extras || ''}</td>
+            <td>${wishes || ''}</td>
         `;
         tableBody.appendChild(row);
     });
@@ -103,4 +135,26 @@ form.addEventListener('submit', function (event) {
 
 closeModalButton.addEventListener('click', () => {
     modal.classList.add('hidden');
+});
+
+confirmOrderButton.addEventListener('click', () => {
+    const selectedTime = orderTimeInput.value;
+    if (!selectedTime) {
+        alert('Пожалуйста, выберите время заказа.');
+        return;
+    }
+
+    const [hours, minutes] = selectedTime.split(':').map(Number);
+    const selectedDateTime = new Date();
+    selectedDateTime.setHours(hours, minutes, 0, 0);
+
+    const currentTime = new Date();
+
+    if (selectedDateTime <= currentTime) {
+        orderTimeInput.style.borderColor = 'red';
+        alert('Мы не умеем перемещаться во времени. Выберите время позже, чем текущее.');
+    } else {
+        orderTimeInput.style.borderColor = '';
+        modal.classList.add('hidden');
+    }
 });
